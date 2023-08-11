@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="gradient_start">#1e8f0a</color>
+    <color name="gradient_end">#150e82</color>
+    <color name="common_border_color">#8bb7e3</color>
+    <color name="tv_text_color">#e1ea0b</color>
 </resources>

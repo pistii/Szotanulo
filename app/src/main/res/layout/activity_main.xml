@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+
     <TextView
         android:id="@+id/card_back"
         android:layout_width="300dp"
@@ -19,7 +20,8 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="#BF3030"
+        android:textColor="@color/tv_text_color"
+        android:background="@drawable/tv_background_color"
         />
 
     <TextView
@@ -34,8 +36,12 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="#326314"
-        />
+        android:textColor="@color/tv_text_color"
+        android:background="@drawable/tv_background_color"
+        >
+
+    </TextView>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
