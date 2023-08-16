@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 
 public class dbConnection extends Activity {
-
     Activity activity;
 
 

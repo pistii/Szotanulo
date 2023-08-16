@@ -1,40 +1,53 @@
 package com.pisti.szotanulo;
 
-public class Repository {
-    public int Id;
-    public String EnglishMeaning;
-    public String HungarianMeaning;
-    public byte RememberanceLevel;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
-    public int getId() {
-        return Id;
+public class Repository {
+
+    @SerializedName("wordId")
+    @Expose
+    private Integer wordId;
+    @SerializedName("hungarianMeaning")
+    @Expose
+    private String hungarianMeaning;
+    @SerializedName("englishMeaning")
+    @Expose
+    private String englishMeaning;
+    @SerializedName("rememberanceLevel")
+    @Expose
+    private Integer rememberanceLevel;
+
+    public Integer getWordId() {
+        return wordId;
     }
 
-    public String getEnglishMeaning() {
-        return EnglishMeaning;
+    public void setWordId(Integer wordId) {
+        this.wordId = wordId;
     }
 
     public String getHungarianMeaning() {
-        return HungarianMeaning;
-    }
-
-    public byte getRememberanceLevel() {
-        return RememberanceLevel;
-    }
-
-    public void setId(Integer id) {
-        this.Id = id;
+        return hungarianMeaning;
     }
 
     public void setHungarianMeaning(String hungarianMeaning) {
-        this.HungarianMeaning = hungarianMeaning;
+        this.hungarianMeaning = hungarianMeaning;
+    }
+
+    public String getEnglishMeaning() {
+        return englishMeaning;
     }
 
     public void setEnglishMeaning(String englishMeaning) {
-        this.EnglishMeaning = englishMeaning;
+        this.englishMeaning = englishMeaning;
     }
 
-    public void setRememberanceLevel(byte rememberanceLevel) {
-        this.RememberanceLevel = rememberanceLevel;
+    public Integer getRememberanceLevel() {
+        return rememberanceLevel;
     }
+
+    public void setRememberanceLevel(Integer rememberanceLevel) {
+        this.rememberanceLevel = rememberanceLevel;
+    }
+
 }

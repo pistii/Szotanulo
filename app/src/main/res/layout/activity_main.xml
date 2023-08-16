@@ -14,7 +14,6 @@
         android:layout_height="300dp"
         android:textAlignment="center"
         android:gravity="center"
-        android:text="Back Card"
         android:textSize="22sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
