@@ -6,4 +6,6 @@
     <color name="gradient_end">#150e82</color>
     <color name="common_border_color">#8bb7e3</color>
     <color name="tv_text_color">#e1ea0b</color>
+    <color name="green">#008000</color>
+    <color name="red">#ff0000</color>
 </resources>

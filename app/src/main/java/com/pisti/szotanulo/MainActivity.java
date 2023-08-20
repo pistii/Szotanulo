@@ -6,13 +6,14 @@ import android.animation.AnimatorInflater;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.okhttp.OkHttpClient;
 
-import org.json.JSONObject;
-
+import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -35,14 +36,23 @@ public class MainActivity extends AppCompatActivity {
     Animator back_animation;
     boolean isFront = true;
     WordsService service;
-    List<Repository> words;
+    List<Repository> words = new ArrayList<>();
     TextView back_tv;
     TextView front_tv;
+    int currentWordId = 0;
+    ImageView successBtn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         AnimationHandler();
+        QueryData();
+        successBtn = findViewById(R.id.icon_success);
+
+        successBtn.setOnClickListener(ImageView -> {
+            //Todo: the user knew the word, lets continue with the next word...
+
+        });
     }
 
     public void AnimationHandler() {
@@ -53,51 +63,28 @@ public class MainActivity extends AppCompatActivity {
         front.setCameraDistance(8000 * scale);
         back.setCameraDistance(8000 * scale);
 
+        front_tv = findViewById(R.id.card_font);
+        back_tv = findViewById(R.id.card_back);
         front_animation = AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.front_animator);
         back_animation = AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.back_animator);
         front.setOnClickListener(view -> {
             if (isFront) {
-                QueryData();
-                if (words != null) {
-                    front_tv.setText(words.get(0).getHungarianMeaning());
-                }
+                front_tv.setText(words.get(currentWordId).getEnglishMeaning());
                 front_animation.setTarget(front);
                 back_animation.setTarget(back);
                 front_animation.start();
                 back_animation.start();
                 isFront = false;
             } else {
-                if (words != null) {
-                    back_tv.setText(words.get(0).getEnglishMeaning());
-                }
+                back_tv.setText(words.get(currentWordId).getHungarianMeaning());
                 front_animation.setTarget(back);
                 back_animation.setTarget(front);
                 back_animation.start();
                 front_animation.start();
                 isFront = true;
             }
-        });
-
-        back.setOnClickListener(view -> {
-            if (isFront) {
-                if (words != null) {
-                    front_tv.setText(words.get(0).getHungarianMeaning());
-                }
-                front_animation.setTarget(front);
-                back_animation.setTarget(back);
-                front_animation.start();
-                back_animation.start();
-                isFront = false;
-            } else {
-                if (words != null) {
-                    back_tv.setText(words.get(0).getEnglishMeaning());
-                }
-                front_animation.setTarget(back);
-                back_animation.setTarget(front);
-                back_animation.start();
-                front_animation.start();
-                isFront = true;
-            }
+            if (currentWordId<words.size());
+                currentWordId++;
         });
     }
     public void QueryData() {
@@ -108,46 +95,41 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         service = retrofit.create(WordsService.class);
-        try {
-            final Call<List<Repository>>[] repo = new Call[]{service.listRepos(4)};
-            repo[0].enqueue(new Callback<List<Repository>>() {
-                @Override
-                public void onResponse(Response<List<Repository>> response) {
-                    if(response.isSuccess()) {
-                        if(!response.body().isEmpty())
-                        {
-                            try {
-                                List<Repository> res = response.body();
-                                for (int i=0;i<res.size();i++) {
-                                    Log.d("res", res.get(i).getWordId().toString());
-                                    Log.d("res", res.get(i).getEnglishMeaning());
-                                    Log.d("res", res.get(i).getHungarianMeaning());
-                                    front_tv.setText("Hello");
-                                }
-                                if (!res.isEmpty()) {
-                                    Log.d("response", "response from server");
-                                }
-                            }catch (Exception exception)
-                            {
-                                Log.d("error", exception.toString());
+
+        Toast.makeText(MainActivity.this, "query data from server... Please wait", Toast.LENGTH_LONG);
+        final Call<List<Repository>>[] repo = new Call[]{service.GetAll(4)};
+        repo[0].enqueue(new Callback<List<Repository>>() {
+            @Override
+            public void onResponse(Response<List<Repository>> response) {
+                if(response.isSuccess()) {
+                    if(!response.body().isEmpty())
+                    {
+                        Repository word = new Repository();
+                        try {
+                            List<Repository> res = response.body();
+                            for (int i=0;i<res.size();i++) {
+                                word.setWordId(res.get(i).getWordId());
+                                word.setHungarianMeaning(res.get(i).getHungarianMeaning());
+                                word.setEnglishMeaning(res.get(i).getEnglishMeaning());
+                                word.setRememberanceLevel(res.get(i).getRememberanceLevel());
+                                words.add(word);
                             }
-                        }
-                    else {
-                        Log.d("No successful connection", "no connection");
+                        }catch (Exception exception)
+                        {
+                            Log.d("error", exception.getMessage());
                         }
                     }
+                else {
+                    Log.d("No successful connection", "no connection");
+                    }
                 }
-                @Override
-                public void onFailure(Throwable t) {
-                    Log.d("connection failure", "failed");
-                    Toast.makeText(MainActivity.this, "Connection failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-        catch (Exception e) {
-            Log.d("exception in connection", "failed");
-            Toast.makeText(MainActivity.this, "error" + e, Toast.LENGTH_SHORT).show();
-        }
+            }
+            @Override
+            public void onFailure(Throwable t) {
+                Log.d("connection failure", "failed");
+                Toast.makeText(MainActivity.this, "Connection failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
     private OkHttpClient setTimeOut() {
         OkHttpClient okHttpClient = new OkHttpClient();
