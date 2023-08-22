@@ -8,12 +8,13 @@ public class Repository {
     @SerializedName("wordId")
     @Expose
     private Integer wordId;
-    @SerializedName("hungarianMeaning")
-    @Expose
-    private String hungarianMeaning;
     @SerializedName("englishMeaning")
     @Expose
     private String englishMeaning;
+
+    @SerializedName("hungarianMeaning")
+    @Expose
+    private String hungarianMeaning;
     @SerializedName("rememberanceLevel")
     @Expose
     private Integer rememberanceLevel;

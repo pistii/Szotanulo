@@ -37,10 +37,14 @@ public class MainActivity extends AppCompatActivity {
     boolean isFront = true;
     WordsService service;
     List<Repository> words = new ArrayList<>();
+    View front;
+    View back;
     TextView back_tv;
     TextView front_tv;
     int currentWordId = 0;
     ImageView successBtn;
+    ImageView failBtn;
+    List<Repository>  failedWords = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,17 +52,25 @@ public class MainActivity extends AppCompatActivity {
         AnimationHandler();
         QueryData();
         successBtn = findViewById(R.id.icon_success);
-
         successBtn.setOnClickListener(ImageView -> {
-            //Todo: the user knew the word, lets continue with the next word...
+            if (currentWordId+1<words.size())
+                currentWordId++;
+            SetCardText();
+            FlipToFront();
+        });
 
+        failBtn = findViewById(R.id.icon_fail);
+        failBtn.setOnClickListener(ImageView -> {
+            failedWords.add(words.get(currentWordId)); // olyan szavak kigyűjtése amelyeknek a megfelelőjét nem sikerült eltalálni
+            if (currentWordId<words.size())
+                currentWordId++;
         });
     }
 
     public void AnimationHandler() {
         float scale = getApplicationContext().getResources().getDisplayMetrics().density;
-        View front = findViewById(R.id.card_font);
-        View back = findViewById(R.id.card_back);
+        front = findViewById(R.id.card_font);
+        back = findViewById(R.id.card_back);
         //front.setCameraDistance(301000 * scale);
         front.setCameraDistance(8000 * scale);
         back.setCameraDistance(8000 * scale);
@@ -69,25 +81,34 @@ public class MainActivity extends AppCompatActivity {
         back_animation = AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.back_animator);
         front.setOnClickListener(view -> {
             if (isFront) {
-                front_tv.setText(words.get(currentWordId).getEnglishMeaning());
-                front_animation.setTarget(front);
-                back_animation.setTarget(back);
-                front_animation.start();
-                back_animation.start();
-                isFront = false;
+                FlipToFront();
             } else {
-                back_tv.setText(words.get(currentWordId).getHungarianMeaning());
                 front_animation.setTarget(back);
                 back_animation.setTarget(front);
                 back_animation.start();
                 front_animation.start();
                 isFront = true;
             }
-            if (currentWordId<words.size());
-                currentWordId++;
+            SetCardText();
         });
     }
+
+    public void SetCardText() {
+        front_tv.setText(words.get(currentWordId).getHungarianMeaning());
+        back_tv.setText(words.get(currentWordId).getEnglishMeaning());
+        Log.d("WORDS", words.get(0).getEnglishMeaning() + ", " +  words.get(1).getEnglishMeaning() + ", " + words.get(2).getHungarianMeaning());
+    }
+
+    public void FlipToFront() {
+        front_animation.setTarget(front);
+        back_animation.setTarget(back);
+        front_animation.start();
+        back_animation.start();
+        isFront = false;
+    }
+
     public void QueryData() {
+        Toast.makeText(MainActivity.this, "query data from server... Please wait", Toast.LENGTH_LONG);
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://szotanuloapi.azurewebsites.net/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -96,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
 
         service = retrofit.create(WordsService.class);
 
-        Toast.makeText(MainActivity.this, "query data from server... Please wait", Toast.LENGTH_LONG);
         final Call<List<Repository>>[] repo = new Call[]{service.GetAll(4)};
         repo[0].enqueue(new Callback<List<Repository>>() {
             @Override
@@ -104,16 +124,17 @@ public class MainActivity extends AppCompatActivity {
                 if(response.isSuccess()) {
                     if(!response.body().isEmpty())
                     {
-                        Repository word = new Repository();
                         try {
                             List<Repository> res = response.body();
                             for (int i=0;i<res.size();i++) {
+                                Repository word = new Repository();
                                 word.setWordId(res.get(i).getWordId());
                                 word.setHungarianMeaning(res.get(i).getHungarianMeaning());
                                 word.setEnglishMeaning(res.get(i).getEnglishMeaning());
                                 word.setRememberanceLevel(res.get(i).getRememberanceLevel());
                                 words.add(word);
                             }
+                            front_tv.setText(words.get(currentWordId).getHungarianMeaning());
                         }catch (Exception exception)
                         {
                             Log.d("error", exception.getMessage());
