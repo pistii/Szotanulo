@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Szotanulo</string>
+    <string name="fromWord">Angol</string>
+    <string name="toWord">Magyar</string>
 </resources>

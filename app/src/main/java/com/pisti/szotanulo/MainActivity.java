@@ -3,7 +3,10 @@ package com.pisti.szotanulo;
 import androidx.appcompat.app.AppCompatActivity;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -12,9 +15,16 @@ import android.widget.Toast;
 
 import com.squareup.okhttp.OkHttpClient;
 
+import org.w3c.dom.Text;
+
+import java.sql.Time;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
@@ -45,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView successBtn;
     ImageView failBtn;
     List<Repository>  failedWords = new ArrayList<>();
+    Boolean fromEnglish = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,16 +66,39 @@ public class MainActivity extends AppCompatActivity {
         successBtn.setOnClickListener(ImageView -> {
             if (currentWordId+1<words.size())
                 currentWordId++;
-            SetCardText();
+
             FlipToFront();
+            SetCardText();
+
         });
+
 
         failBtn = findViewById(R.id.icon_fail);
         failBtn.setOnClickListener(ImageView -> {
             failedWords.add(words.get(currentWordId)); // olyan szavak kigyűjtése amelyeknek a megfelelőjét nem sikerült eltalálni
-            if (currentWordId<words.size())
-                currentWordId++;
+            if (currentWordId<words.size()) {
+                Random random = new Random();
+                currentWordId = random.nextInt(words.size());
+            }
+            FlipToFront();
+            SetCardText();
         });
+
+        ImageView arrow = findViewById(R.id.arrow);
+        arrow.setOnClickListener(ImageView -> {
+            TextView from = findViewById(R.id.fromWord);
+            TextView to = findViewById(R.id.toWord);
+            if (!from.getText().equals("Angol")) {
+                from.setText(R.string.fromWord);
+                to.setText(R.string.toWord);
+                fromEnglish = true;
+            } else {
+                from.setText(R.string.toWord);
+                to.setText(R.string.fromWord);
+                fromEnglish = false;
+            }
+        });
+
     }
 
     public void AnimationHandler() {
@@ -89,22 +123,35 @@ public class MainActivity extends AppCompatActivity {
                 front_animation.start();
                 isFront = true;
             }
-            SetCardText();
         });
     }
 
     public void SetCardText() {
-        front_tv.setText(words.get(currentWordId).getHungarianMeaning());
-        back_tv.setText(words.get(currentWordId).getEnglishMeaning());
-        Log.d("WORDS", words.get(0).getEnglishMeaning() + ", " +  words.get(1).getEnglishMeaning() + ", " + words.get(2).getHungarianMeaning());
+        if (fromEnglish) {
+            front_tv.setText(words.get(currentWordId).getHungarianMeaning()+"ITT");
+            back_tv.setText(words.get(currentWordId).getEnglishMeaning());
+        } else {
+            front_tv.setText(words.get(currentWordId).getEnglishMeaning());
+            back_tv.setText(words.get(currentWordId).getHungarianMeaning());
+        }
+
+        countDownLatch.countDown();
+
     }
+    CountDownLatch countDownLatch = new CountDownLatch(1);
 
     public void FlipToFront() {
+
         front_animation.setTarget(front);
         back_animation.setTarget(back);
         front_animation.start();
         back_animation.start();
         isFront = false;
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void QueryData() {
@@ -134,13 +181,15 @@ public class MainActivity extends AppCompatActivity {
                                 word.setRememberanceLevel(res.get(i).getRememberanceLevel());
                                 words.add(word);
                             }
-                            front_tv.setText(words.get(currentWordId).getHungarianMeaning());
+                            SetCardText();
                         }catch (Exception exception)
                         {
+                            Toast.makeText(MainActivity.this, "error: " + exception, Toast.LENGTH_LONG);
                             Log.d("error", exception.getMessage());
                         }
                     }
                 else {
+                    Toast.makeText(MainActivity.this, "error while connectiong to server", Toast.LENGTH_LONG);
                     Log.d("No successful connection", "no connection");
                     }
                 }
