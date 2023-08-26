@@ -21,7 +21,6 @@ import retrofit.Response;
 import retrofit.Retrofit;
 
 public class MainActivity extends AppCompatActivity {
-
     List<Repository> words;
     TextView back_tv;
     TextView front_tv;

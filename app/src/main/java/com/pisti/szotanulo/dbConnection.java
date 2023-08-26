@@ -1,5 +1,6 @@
 package com.pisti.szotanulo;
 import android.content.Context;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -27,10 +28,23 @@ public class dbConnection extends MainActivity {
     List<Repository> words;
     WordsService service;
     Context mainActivity;
+    CountDownTimer timer;
     public dbConnection (MainActivity mainActivity) {
         this.mainActivity = mainActivity.getApplicationContext();
         words = new ArrayList<>();
         QueryData();
+        timer = new CountDownTimer(30000, 1000) {
+            @Override
+            public void onTick(long l) {}
+
+            @Override
+            public void onFinish() {
+                if (words.size() <= 3) {
+                    QueryData();
+                    timer.start();
+                }
+            }
+        }.start();
     }
 
     public List<Repository> QueryData() {
